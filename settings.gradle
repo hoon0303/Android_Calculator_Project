@@ -1,0 +1,2 @@
+include ':app'
+rootProject.name = "Term_project_20164006(parkhoon)"
