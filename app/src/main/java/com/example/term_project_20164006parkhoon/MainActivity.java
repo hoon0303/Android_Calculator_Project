@@ -28,6 +28,7 @@ public class MainActivity extends TabActivity {
     LinkedList_Queue queue;//연결리스트 큐
 
     Button clean, rst;//계산 초기화 버튼
+    Button history_reset;
 
     TextView expression, textResult;
     String exp;
@@ -86,7 +87,7 @@ public class MainActivity extends TabActivity {
         list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                                         public void onItemClick(AdapterView<?> arg0, View arg1, int arg2,
                                                                 long arg3) {
-                                            Toast.makeText(getApplicationContext(), "파일",
+                                            Toast.makeText(getApplicationContext(), "history",
                                                     Toast.LENGTH_SHORT).show();
                                         }
                                     });
@@ -105,9 +106,7 @@ public class MainActivity extends TabActivity {
         tabSpecArtist.setContent(R.id.history);
         tabHost.addTab(tabSpecArtist);
 
-        TabSpec tabSpecAlbum = tabHost.newTabSpec("Quiz").setIndicator("Quiz");
-        tabSpecAlbum.setContent(R.id.Quiz);
-        tabHost.addTab(tabSpecAlbum);
+
 
         tabHost.setCurrentTab(0);
 
@@ -195,6 +194,7 @@ public class MainActivity extends TabActivity {
             }
         });
 
+        //계산결과 처리
         rst = (Button) findViewById(R.id.BtnRst);
         rst.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
@@ -219,21 +219,36 @@ public class MainActivity extends TabActivity {
                     result = cal.eval();
                     textResult.setText(result);
 
-
                     try {
+                        ArrayList<String> readarray = new ArrayList<String>() ;
                         FileInputStream inFs = openFileInput("file.txt");
                         byte[] txt = new byte[1000];
                         inFs.read(txt);
-                        str = new String(txt);
+                        String str2 = new String(txt);
+                        str2 = str2 +",";
+                        while(str2.length()!=0)
+                        {
+                            int idx = str2.indexOf(",");
+                            String temp1 = str2.substring(0,idx);
+                            readarray.add(temp1);
+                            str2 = str2.substring(idx+1);
+                        }
                         inFs.close();
+                        if(readarray.size()>=50)
+                        {
+                            readarray.remove(50);
+                        }
+                        for(String i : readarray) { //for문을 통한 전체출력
+                            str= str +","+i;
+                        }
                     } catch (IOException e) {
-                        Toast.makeText(getApplicationContext(), "파일 없음" , Toast.LENGTH_SHORT).show();
+
                     }
 
                     try {
                         FileOutputStream outFs = openFileOutput("file.txt",
                                 Context.MODE_PRIVATE);
-                        str = exp+" = "+result + ","+str;
+                        str = exp+" = "+result +str;
                         outFs.write(str.getBytes());
                         outFs.close();
                         Toast.makeText(getApplicationContext(), "history 저장", Toast.LENGTH_SHORT).show();
@@ -246,8 +261,6 @@ public class MainActivity extends TabActivity {
                 }catch (Exception e){
                     Toast.makeText(getApplicationContext(),"계산 오류",Toast.LENGTH_SHORT).show();
                 }
-
-
 
                 items.clear();
                 try {
@@ -268,6 +281,23 @@ public class MainActivity extends TabActivity {
                 } catch (IOException e) {
 
                 }
+                adapter.notifyDataSetChanged();
+
+            }
+        });
+
+        history_reset = (Button) findViewById(R.id.history_reset);
+        history_reset.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                try {
+                    FileOutputStream outFs = openFileOutput("file.txt",
+                            Context.MODE_PRIVATE);
+                    String str = "";
+                    outFs.write(str.getBytes());
+                    outFs.close();
+                } catch (IOException e) {
+                }
+                items.clear();
                 adapter.notifyDataSetChanged();
 
             }

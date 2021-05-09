@@ -370,18 +370,19 @@
                     <ListView
                         android:id="@+id/listView1"
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content" >
+                        android:layout_height="600dp" >
                     </ListView>
+                    <Button
+                        android:layout_width="match_parent"
+                        android:layout_height="50dp"
+                        android:id="@+id/history_reset"
+                        android:textSize="20dp"
+                        android:text="history 초기화">
+                </Button>
                 </LinearLayout>
             </LinearLayout>
 
-            <LinearLayout
-                android:id="@+id/Quiz"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:background="#f000ff"
-                android:orientation="vertical">
-            </LinearLayout>
+
         </FrameLayout>
         <TabWidget
             android:id="@android:id/tabs"
