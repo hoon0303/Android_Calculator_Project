@@ -1,13 +1,24 @@
 package com.example.term_project_20164006parkhoon;
 
 import android.app.TabActivity;
+import android.content.Context;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.ListView;
 import android.widget.TabHost;
 import android.widget.TabHost.TabSpec;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.ArrayList;
 
 @SuppressWarnings("deprecation")
 public class MainActivity extends TabActivity {
@@ -20,7 +31,7 @@ public class MainActivity extends TabActivity {
 
     TextView expression, textResult;
     String exp;
-    Integer result;
+    String result;
 
     ///////////버튼 변수 설정
     Button[] numButtons = new Button[10];
@@ -43,7 +54,46 @@ public class MainActivity extends TabActivity {
 
         //////////////////////////////////////////////
 
+        ArrayList<String> items = new ArrayList<String>() ;
 
+
+        try {
+            FileInputStream inFs = openFileInput("file.txt");
+            byte[] txt = new byte[1000];
+            inFs.read(txt);
+            String str2 = new String(txt);
+            str2 = str2 +",";
+            while(str2.length()!=0)
+            {
+                int idx = str2.indexOf(",");
+                String temp1 = str2.substring(0,idx);
+                items.add(temp1);
+                str2 = str2.substring(idx+1);
+            }
+
+            inFs.close();
+        } catch (IOException e) {
+
+        }
+
+        /////리스트뷰
+        ListView list = (ListView) findViewById(R.id.listView1);
+
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,
+                android.R.layout.simple_list_item_1, items);
+        list.setAdapter(adapter);
+
+        list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                                        public void onItemClick(AdapterView<?> arg0, View arg1, int arg2,
+                                                                long arg3) {
+                                            Toast.makeText(getApplicationContext(), "파일",
+                                                    Toast.LENGTH_SHORT).show();
+                                        }
+                                    });
+        ///////////////////////////////////
+
+
+        /////////////////////////////////
         TabHost tabHost = getTabHost();
 
         TabSpec tabSpecSong = tabHost.newTabSpec("Calculator").setIndicator("Calculator");
@@ -163,13 +213,63 @@ public class MainActivity extends TabActivity {
 
                 queue.printListQueue();
                 calc cal = new calc();
-
+                String str="";
                 try {
                     cal.infix_to_postfix(queue);
-                    textResult.setText(cal.eval());
+                    result = cal.eval();
+                    textResult.setText(result);
+
+
+                    try {
+                        FileInputStream inFs = openFileInput("file.txt");
+                        byte[] txt = new byte[1000];
+                        inFs.read(txt);
+                        str = new String(txt);
+                        inFs.close();
+                    } catch (IOException e) {
+                        Toast.makeText(getApplicationContext(), "파일 없음" , Toast.LENGTH_SHORT).show();
+                    }
+
+                    try {
+                        FileOutputStream outFs = openFileOutput("file.txt",
+                                Context.MODE_PRIVATE);
+                        str = exp+" = "+result + ","+str;
+                        outFs.write(str.getBytes());
+                        outFs.close();
+                        Toast.makeText(getApplicationContext(), "history 저장", Toast.LENGTH_SHORT).show();
+                    } catch (IOException e) {
+                        Toast.makeText(getApplicationContext(), "history 저장에러", Toast.LENGTH_SHORT).show();
+                    }
+
+
+
                 }catch (Exception e){
                     Toast.makeText(getApplicationContext(),"계산 오류",Toast.LENGTH_SHORT).show();
                 }
+
+
+
+                items.clear();
+                try {
+                    FileInputStream inFs = openFileInput("file.txt");
+                    byte[] txt = new byte[1000];
+                    inFs.read(txt);
+                    String str2 = new String(txt);
+                    str2 = str2 +",";
+                    while(str2.length()!=0)
+                    {
+                        int idx = str2.indexOf(",");
+                        String temp1 = str2.substring(0,idx);
+                        items.add(temp1);
+                        str2 = str2.substring(idx+1);
+                    }
+
+                    inFs.close();
+                } catch (IOException e) {
+
+                }
+                adapter.notifyDataSetChanged();
+
             }
         });
 
