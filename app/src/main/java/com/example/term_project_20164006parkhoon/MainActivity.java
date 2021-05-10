@@ -46,19 +46,19 @@ public class MainActivity extends TabActivity {
     int i;
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
+    public void onCreate(Bundle savedInstanceState) {//프로젝트 생성될때 동작
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
         ///////////////////////////////////////////////
-        queue = new LinkedList_Queue();
+        queue = new LinkedList_Queue();//연결리스트 큐 생성
 
         //////////////////////////////////////////////
 
-        ArrayList<String> items = new ArrayList<String>() ;
+        ArrayList<String> items = new ArrayList<String>() ;//연결리스트 생성
 
 
-        try {
+        try {//파일 읽기
             FileInputStream inFs = openFileInput("file.txt");
             byte[] txt = new byte[1000];
             inFs.read(txt);
@@ -91,11 +91,8 @@ public class MainActivity extends TabActivity {
                                                     Toast.LENGTH_SHORT).show();
                                         }
                                     });
-        ///////////////////////////////////
 
-
-        /////////////////////////////////
-        TabHost tabHost = getTabHost();
+        TabHost tabHost = getTabHost();//탭 호스트
 
         TabSpec tabSpecSong = tabHost.newTabSpec("Calculator").setIndicator("Calculator");
         tabSpecSong.setContent(R.id.Calculator);
@@ -110,8 +107,8 @@ public class MainActivity extends TabActivity {
 
         tabHost.setCurrentTab(0);
 
-        expression = (TextView) findViewById(R.id.txt_expression);
-        textResult = (TextView) findViewById(R.id.txt_result);
+        expression = (TextView) findViewById(R.id.txt_expression);//계산식 텍스트뷰
+        textResult = (TextView) findViewById(R.id.txt_result);//결과 텍스트뷰
 
 
         //계산 버튼 이벤트 처리
@@ -201,12 +198,11 @@ public class MainActivity extends TabActivity {
 
                 String temp = expression.getText().toString()+" ";
                 System.out.println(temp);
-                while(temp.length()!=0)
+                while(temp.length()!=0)//계산식 읽어서 큐에 저장
                 {
                     int idx = temp.indexOf(" ");
                     String temp1 = temp.substring(0,idx);
                     queue.enqueue(temp1);
-                    System.out.println("token "+temp1);
                     temp = temp.substring(idx+1);
                 }
                 queue.dequeue();
@@ -214,16 +210,16 @@ public class MainActivity extends TabActivity {
                 queue.printListQueue();
                 calc cal = new calc();
                 String str="";
-                try {
+                try {//계산 진행
                     cal.infix_to_postfix(queue);
-                    result = cal.eval();
-                    textResult.setText(result);
+                    result = cal.eval();//계산 결과 저장
+                    textResult.setText(result);//계산 결과 텍스트뷰에 출력
 
-                    try {
-                        ArrayList<String> readarray = new ArrayList<String>() ;
-                        FileInputStream inFs = openFileInput("file.txt");
+                    try {//history 읽어서 연결리스트에 저장
+                        ArrayList<String> readarray = new ArrayList<String>() ;//연결리스트 생성
+                        FileInputStream inFs = openFileInput("file.txt");//파일을 열음
                         byte[] txt = new byte[1000];
-                        inFs.read(txt);
+                        inFs.read(txt);//history에 저장된 데이터를 읽음
                         String str2 = new String(txt);
                         str2 = str2 +",";
                         while(str2.length()!=0)
@@ -234,7 +230,7 @@ public class MainActivity extends TabActivity {
                             str2 = str2.substring(idx+1);
                         }
                         inFs.close();
-                        if(readarray.size()>=50)
+                        if(readarray.size()>=50)//history가 50개 이상이면 마지막 요소 삭제
                         {
                             readarray.remove(50);
                         }
@@ -245,7 +241,7 @@ public class MainActivity extends TabActivity {
 
                     }
 
-                    try {
+                    try {//history 저장
                         FileOutputStream outFs = openFileOutput("file.txt",
                                 Context.MODE_PRIVATE);
                         str = exp+" = "+result +str;
@@ -262,8 +258,8 @@ public class MainActivity extends TabActivity {
                     Toast.makeText(getApplicationContext(),"계산 오류",Toast.LENGTH_SHORT).show();
                 }
 
-                items.clear();
-                try {
+                items.clear();//리스트뷰의 연결리스트 초기화
+                try {//history 파일을 읽음
                     FileInputStream inFs = openFileInput("file.txt");
                     byte[] txt = new byte[1000];
                     inFs.read(txt);
@@ -286,8 +282,8 @@ public class MainActivity extends TabActivity {
             }
         });
 
-        history_reset = (Button) findViewById(R.id.history_reset);
-        history_reset.setOnClickListener(new View.OnClickListener() {
+        history_reset = (Button) findViewById(R.id.history_reset);//history 초기화 버튼
+        history_reset.setOnClickListener(new View.OnClickListener() {//history 초기화 버튼이 클릭된 경우
             public void onClick(View v) {
                 try {
                     FileOutputStream outFs = openFileOutput("file.txt",
@@ -299,6 +295,44 @@ public class MainActivity extends TabActivity {
                 }
                 items.clear();
                 adapter.notifyDataSetChanged();
+
+            }
+        });
+
+        Button File_write_btn = (Button) findViewById(R.id.button1);//파일 저장 버튼
+        File_write_btn.setOnClickListener(new View.OnClickListener() {//history 초기화 버튼이 클릭된 경우
+            public void onClick(View v) {
+                try {
+                    FileOutputStream outFs = openFileOutput("data.txt",
+                            Context.MODE_PRIVATE);
+                    String str = expression.getText()+"="+textResult.getText();
+                    outFs.write(str.getBytes());
+                    outFs.close();
+                    Toast.makeText(getApplicationContext(), str+" 저장", Toast.LENGTH_SHORT).show();
+                } catch (IOException e) {
+                }
+
+            }
+        });
+        Button File_read_btn = (Button) findViewById(R.id.button2);//파일 읽기 버튼
+        File_read_btn.setOnClickListener(new View.OnClickListener() {//history 초기화 버튼이 클릭된 경우
+            public void onClick(View v) {
+                try {//history 파일을 읽음
+                    FileInputStream inFs = openFileInput("data.txt");
+                    byte[] txt = new byte[1000];
+                    inFs.read(txt);
+                    String str2 = new String(txt);
+
+                    int idx = str2.indexOf("=");
+                    String temp1 = str2.substring(0,idx);
+                    str2 = str2.substring(idx+1);
+                    expression.setText(temp1);
+                    textResult.setText(str2);
+
+                    inFs.close();
+                } catch (IOException e) {
+
+                }
 
             }
         });
