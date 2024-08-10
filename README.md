@@ -32,4 +32,3 @@ Android_Calculator_Project-master/
 └── settings.gradle
 ```
 
-
